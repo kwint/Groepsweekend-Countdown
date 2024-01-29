@@ -1,116 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Countdown Timer</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Countdown Timer</title>
 
-    <!-- Icon-->
-    <link rel="icon" type="image/x-icon" href="shuttle.png">
+  <!-- Icon-->
+  <link rel="icon" type="image/x-icon" href="shuttle.png">
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="style.css">
-    <!-- Javascript -->
-    <script src="script.js" defer></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Javascript -->
+  <script src="script.js" defer></script>
 
 </head>
+
 <body>
   <!------------------------------------------------ Countdown Timer ------------------------------------------------------>
-    <h1 class="wave">&#128640</h1>
-    <!-- Big Heading -->
-    <h1>Until JWST Launch</h1>
-    <!-- Countdown Timer -->
-        <div class="countdown-container">
-            <!-- Days -->
-            <div class="center days-container">
-                <p class="bigtext" id="days">0</p>                
-                <span>days</span>
-            </div>
+  <h1 class="wave">&#x26FA</h1>
+  <!-- Big Heading -->
+  <h1>Groepsweekend</h1>
+  <!-- Countdown Timer -->
+  <div class="countdown-container">
+    <!-- Days -->
+    <div class="center days-container">
+      <p class="bigtext" id="days">0</p>
+      <span>dagen</span>
+    </div>
 
-            <!-- Hours -->
-            <div class="center hours-container">
-                <p class="bigtext" id="hours">0</p>                
-                <span>hours</span>
-            </div>
+    <!-- Hours -->
+    <div class="center hours-container">
+      <p class="bigtext" id="hours">0</p>
+      <span>uren</span>
+    </div>
 
-            <!-- Minutes -->
-            <div class="center minutes-container">
-                <p class="bigtext" id="minutes">0</p>                
-                <span>mins</span>
-            </div>
-            
-            <!-- Seconds -->
-            <div class="center seconds-container">
-                <p class="bigtext" id="seconds">0</p>                
-                <span>secs</span>
-            </div>
-        </div>
+    <!-- Minutes -->
+    <div class="center minutes-container">
+      <p class="bigtext" id="minutes">0</p>
+      <span>minuten</span>
+    </div>
 
-    <!------------------------------------------------- Three JS Space Background ---------------------------------------->
-    <script src="three.min.js"></script>
-    <script>
-    let scene, camera, renderer, stars, starGeo;
+    <!-- Seconds -->
+    <div class="center seconds-container">
+      <p class="bigtext" id="seconds">0</p>
+      <span>seconden</span>
+    </div>
+  </div>
+
+  <!------------------------------------------------- Three JS Space Background ---------------------------------------->
+  <script src="three.min.js"></script>
+  <script>
+    let scene, camera, renderer, stars
+    const MAXSTARS = 3000
+    const VELOCITY = 1
+    init();
+    animate();
 
     function init() {
 
       scene = new THREE.Scene();
 
-      camera = new THREE.PerspectiveCamera(60,window.innerWidth / window.innerHeight, 1, 1000);
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
       camera.position.z = 1;
-      camera.rotation.x = Math.PI/2;
+      camera.rotation.x = Math.PI / 2;
 
       renderer = new THREE.WebGLRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      starGeo = new THREE.Geometry();
-      for(let i=0;i<6000;i++) {
-        star = new THREE.Vector3(
-          Math.random() * 600 - 300,
-          Math.random() * 600 - 300,
-          Math.random() * 600 - 300
-        );
-        star.velocity = 0;
-        star.acceleration = 0.02;
-        starGeo.vertices.push(star);
+      const points = []
+      const velocities = []
+
+      const positions = new Float32Array(MAXSTARS * 3);
+      let index = 0
+      for (let i = 0; i < MAXSTARS; i++) {
+        positions[index] = Math.random() * 400 - 200
+        positions[index + 1] = Math.random() * 600 - 500
+        positions[index + 2] = Math.random() * 400 - 200
+        index += 3
       }
 
-      let sprite = new THREE.TextureLoader().load( 'star.png' );
+      geometry = new THREE.BufferGeometry()
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+      let sprite = new THREE.TextureLoader().load('star.png');
       let starMaterial = new THREE.PointsMaterial({
         color: 0xaaaaaa,
         size: 0.7,
         map: sprite
       });
 
-      stars = new THREE.Points(starGeo,starMaterial);
+
+      stars = new THREE.Points(geometry, starMaterial);
       scene.add(stars);
 
       window.addEventListener("resize", onWindowResize, false);
 
-      animate(); 
     }
     function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      }
-    function animate() {
-      starGeo.vertices.forEach(p => {
-        p.velocity += p.acceleration
-        p.y -= p.velocity;
-        
-        if (p.y < -200) {
-          p.y = 200;
-          p.velocity = 0;
-        }
-      });
-      starGeo.verticesNeedUpdate = true;
-      stars.rotation.y +=0.002;
-    
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      console.info(window.innerHeight)
+      console.info(window.innerWidth)
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
     }
-    init();
-    </script>
+
+    function render() {
+      renderer.render(scene, camera)
+    }
+
+    function updatePos() {
+      const positions = stars.geometry.attributes.position.array;
+      let index = 1
+      for (let i = 0; i < MAXSTARS; i++) {
+        positions[index] = positions[index] - VELOCITY
+        if (positions[index] < -500) {
+          positions[index] = 200;
+        }
+
+        index += 3;
+
+      };
+      stars.rotation.y += 0.002;
+      stars.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+      stars.geometry.attributes.position.needsUpate = true;
+
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      updatePos()
+      render();
+
+    }
+
+  </script>
 </body>
+
 </html>
