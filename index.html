@@ -53,7 +53,7 @@
   <script src="three.min.js"></script>
   <script>
     let scene, camera, renderer, stars
-    const MAXSTARS = 3000
+    const MAXSTARS = 300
     const VELOCITY = 1
     init();
     animate();
@@ -76,9 +76,9 @@
       const positions = new Float32Array(MAXSTARS * 3);
       let index = 0
       for (let i = 0; i < MAXSTARS; i++) {
-        positions[index] = Math.random() * 400 - 200
-        positions[index + 1] = Math.random() * 600 - 500
-        positions[index + 2] = Math.random() * 400 - 200
+        positions[index] = Math.random() * 200 - 100
+        positions[index + 1] = Math.random() * 200
+        positions[index + 2] = Math.random() * 200 - 100
         index += 3
       }
 
@@ -116,7 +116,7 @@
       let index = 1
       for (let i = 0; i < MAXSTARS; i++) {
         positions[index] = positions[index] - VELOCITY
-        if (positions[index] < -500) {
+        if (positions[index] < 0) {
           positions[index] = 200;
         }
 
@@ -125,7 +125,9 @@
       };
       stars.rotation.y += 0.002;
       stars.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-      stars.geometry.attributes.position.needsUpate = true;
+      stars.geometry.computeBoundingBox();
+      stars.geometry.computeBoundingSphere();
+      stars.geometry.needsUpate = true;
 
     }
 
