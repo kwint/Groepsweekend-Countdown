@@ -127,10 +127,9 @@
 
       };
       stars.rotation.y += 0.002;
-      stars.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
       stars.geometry.computeBoundingBox();
       stars.geometry.computeBoundingSphere();
-      stars.geometry.needsUpate = true;
+      stars.geometry.attributes.position.needsUpdate = true;
 
     }
 
